@@ -2,6 +2,13 @@
 
 ## Behavioral Grooming Prevention & Investigator Protection Ecosystem
 
+[![Author](https://img.shields.io/badge/Author-Joas%20Antonio-blue)](https://github.com/CyberSecurityUP)
+[![GitHub](https://img.shields.io/badge/GitHub-CyberSecurityUP-black?logo=github)](https://github.com/CyberSecurityUP)
+[![License](https://img.shields.io/badge/License-MIT%20with%20Ethical%20Use-green)](LICENSE)
+[![Version](https://img.shields.io/badge/Version-1.0.0-orange)](https://github.com/CyberSecurityUP/GROOMSAFE)
+
+**Author:** Joas Antonio ([@CyberSecurityUP](https://github.com/CyberSecurityUP))
+
 ---
 
 ## Overview
@@ -450,7 +457,24 @@ This is a research and safety project. Contributions should:
 
 ## License
 
-[Specify appropriate license - consider MIT, Apache 2.0, or academic license]
+MIT License with Ethical Use Clause
+
+Copyright (c) 2024 Joas Antonio
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+**Ethical Use Clause**: This software is intended solely for child safety, research, and educational purposes. Any use that harms, exploits, or endangers children or vulnerable populations is strictly prohibited.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+
+---
+
+## Author
+
+**Joas Antonio**
+- GitHub: [@CyberSecurityUP](https://github.com/CyberSecurityUP)
+- Project: GROOMSAFE + HUMANSHIELD
+- Focus: Cybersecurity, Child Safety, Behavioral Analysis
 
 ---
 
@@ -458,8 +482,13 @@ This is a research and safety project. Contributions should:
 
 If you use this system in research, please cite:
 
-```
-[Citation format to be determined based on publication]
+```bibtex
+@software{groomsafe2024,
+  author = {Antonio, Joas},
+  title = {GROOMSAFE + HUMANSHIELD: Behavioral Grooming Prevention \& Investigator Protection Ecosystem},
+  year = {2024},
+  url = {https://github.com/CyberSecurityUP/GROOMSAFE}
+}
 ```
 
 ---
@@ -468,9 +497,9 @@ If you use this system in research, please cite:
 
 For questions, issues, or research collaboration:
 
-- **Issues**: [GitHub Issues]
-- **Research Inquiries**: [Contact Information]
-- **Security Concerns**: [Security Contact]
+- **GitHub**: [CyberSecurityUP/GROOMSAFE](https://github.com/CyberSecurityUP)
+- **Issues**: [GitHub Issues](https://github.com/CyberSecurityUP/GROOMSAFE/issues)
+- **Author**: Joas Antonio - [@CyberSecurityUP](https://github.com/CyberSecurityUP)
 
 ---
 
