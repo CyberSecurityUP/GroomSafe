@@ -1,0 +1,442 @@
+"""
+GROOMSAFE LLM-Enhanced Analysis
+Supports multiple LLM providers for enriched behavioral analysis
+Default: Ollama (local, free)
+Optional: Gemini, Claude, ChatGPT
+"""
+
+from typing import Optional, Dict, List, Any
+from dataclasses import dataclass
+from enum import Enum
+import json
+import requests
+from abc import ABC, abstractmethod
+
+
+class LLMProvider(str, Enum):
+    """Supported LLM providers"""
+    OLLAMA = "ollama"
+    GEMINI = "gemini"
+    CLAUDE = "claude"
+    CHATGPT = "chatgpt"
+
+
+@dataclass
+class LLMConfig:
+    """LLM configuration"""
+    provider: LLMProvider = LLMProvider.OLLAMA
+    model: str = "llama-guard-3"  # Default Ollama model
+    api_key: Optional[str] = None
+    endpoint: str = "http://localhost:11434"  # Default Ollama endpoint
+    temperature: float = 0.3  # Low temperature for consistent analysis
+    max_tokens: int = 1000
+
+
+@dataclass
+class LLMAnalysis:
+    """LLM analysis result"""
+    provider: str
+    model: str
+    risk_factors: List[str]
+    severity_assessment: str  # low, moderate, high, critical
+    confidence: float  # 0.0 to 1.0
+    explanation: str
+    grooming_indicators: List[str]
+    recommended_actions: List[str]
+    raw_response: Optional[str] = None
+
+
+class LLMAnalyzer(ABC):
+    """Abstract base class for LLM analyzers"""
+
+    def __init__(self, config: LLMConfig):
+        self.config = config
+
+    @abstractmethod
+    def analyze_conversation(self, messages: List[Dict[str, Any]], behavioral_score: float = None) -> Optional[LLMAnalysis]:
+        """Analyze conversation and return LLM-enhanced insights
+
+        Args:
+            messages: List of conversation messages
+            behavioral_score: Optional behavioral risk score (0-100)
+        """
+        pass
+
+    def _build_prompt(self, messages: List[Dict[str, Any]], behavioral_score: float = None) -> str:
+        """Build analysis prompt for grooming detection
+
+        Args:
+            messages: List of conversation messages
+            behavioral_score: Optional behavioral risk score (0-100) from pattern analysis
+        """
+
+        # Format messages
+        conversation_text = "\n".join([
+            f"[{msg['sender_role'].upper()}] {msg['abstracted_text']}"
+            for msg in messages
+        ])
+
+        # Add behavioral score context if available
+        score_context = ""
+        if behavioral_score is not None:
+            score_context = f"""
+BEHAVIORAL PATTERN ANALYSIS SCORE: {behavioral_score:.1f}/100
+- This score was calculated using mathematical analysis of behavioral patterns
+- Use this as a reference point, but make your own independent assessment
+- If your assessment differs significantly, explain why in your response
+"""
+
+        prompt = f"""You are a child safety expert analyzing a conversation for potential grooming behaviors.
+
+IMPORTANT INSTRUCTIONS:
+- Focus on BEHAVIORAL patterns, not just keywords
+- Consider multilingual context (English, Portuguese, Spanish)
+- Identify escalation patterns and manipulation tactics
+- Be sensitive to cultural differences in communication
+{score_context}
+
+CONVERSATION TO ANALYZE:
+{conversation_text}
+
+ANALYZE FOR:
+1. Secrecy requests ("don't tell anyone", "entre nós", "secreto", "fica entre nós")
+2. Isolation attempts (separating from family/friends, "seus pais não entendem")
+3. Emotional dependency building ("only I understand you", "ninguém te entende", "você é especial")
+4. Platform migration (moving to private channels, "me adiciona no telegram")
+5. Time irregularity (late night messaging, unusual hours)
+6. Tone/relationship escalation over time
+7. Boundary testing and normalization
+8. Trust exploitation and manipulation
+
+RESPOND IN JSON FORMAT:
+{{
+    "severity": "low|moderate|high|critical",
+    "confidence": 0.0-1.0,
+    "risk_factors": ["list of concerning behaviors found"],
+    "grooming_indicators": ["specific grooming tactics identified"],
+    "explanation": "detailed analysis of behavioral patterns",
+    "recommended_actions": ["specific steps to take"]
+}}
+
+JSON RESPONSE:"""
+
+        return prompt
+
+    def _parse_llm_response(self, response_text: str) -> Optional[Dict]:
+        """Parse JSON response from LLM"""
+        try:
+            # Try to find JSON in response
+            start = response_text.find('{')
+            end = response_text.rfind('}') + 1
+            if start >= 0 and end > start:
+                json_str = response_text[start:end]
+                return json.loads(json_str)
+            return None
+        except Exception as e:
+            print(f"Failed to parse LLM response: {e}")
+            return None
+
+
+class OllamaAnalyzer(LLMAnalyzer):
+    """Ollama LLM analyzer (local, free)"""
+
+    def __init__(self, config: LLMConfig):
+        super().__init__(config)
+        # Recommended models for grooming detection
+        self.recommended_models = [
+            "llama-guard-3",      # Meta's safety model
+            "llama3.2",           # General purpose
+            "mistral",            # Good at instruction following
+            "gemma2",             # Google's safety-focused model
+        ]
+
+    def analyze_conversation(self, messages: List[Dict[str, Any]]) -> Optional[LLMAnalysis]:
+        """Analyze using Ollama"""
+        try:
+            prompt = self._build_prompt(messages)
+
+            # Ollama API request
+            response = requests.post(
+                f"{self.config.endpoint}/api/generate",
+                json={
+                    "model": self.config.model,
+                    "prompt": prompt,
+                    "stream": False,
+                    "options": {
+                        "temperature": self.config.temperature,
+                        "num_predict": self.config.max_tokens
+                    }
+                },
+                timeout=30
+            )
+
+            if response.status_code != 200:
+                print(f"Ollama API error: {response.status_code}")
+                return None
+
+            result = response.json()
+            llm_response = result.get("response", "")
+
+            # Parse JSON response
+            parsed = self._parse_llm_response(llm_response)
+            if not parsed:
+                return None
+
+            return LLMAnalysis(
+                provider="ollama",
+                model=self.config.model,
+                severity_assessment=parsed.get("severity", "unknown"),
+                confidence=float(parsed.get("confidence", 0.0)),
+                risk_factors=parsed.get("risk_factors", []),
+                grooming_indicators=parsed.get("grooming_indicators", []),
+                explanation=parsed.get("explanation", ""),
+                recommended_actions=parsed.get("recommended_actions", []),
+                raw_response=llm_response
+            )
+
+        except requests.exceptions.ConnectionError:
+            print("Ollama not available. Install: https://ollama.ai")
+            return None
+        except Exception as e:
+            print(f"Ollama analysis error: {e}")
+            return None
+
+
+class GeminiAnalyzer(LLMAnalyzer):
+    """Google Gemini API analyzer"""
+
+    def analyze_conversation(self, messages: List[Dict[str, Any]]) -> Optional[LLMAnalysis]:
+        """Analyze using Gemini API"""
+        if not self.config.api_key:
+            return None
+
+        try:
+            prompt = self._build_prompt(messages)
+
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.config.model}:generateContent"
+            headers = {"Content-Type": "application/json"}
+
+            response = requests.post(
+                url,
+                headers=headers,
+                params={"key": self.config.api_key},
+                json={
+                    "contents": [{"parts": [{"text": prompt}]}],
+                    "generationConfig": {
+                        "temperature": self.config.temperature,
+                        "maxOutputTokens": self.config.max_tokens
+                    }
+                },
+                timeout=30
+            )
+
+            if response.status_code != 200:
+                return None
+
+            result = response.json()
+            llm_response = result["candidates"][0]["content"]["parts"][0]["text"]
+
+            parsed = self._parse_llm_response(llm_response)
+            if not parsed:
+                return None
+
+            return LLMAnalysis(
+                provider="gemini",
+                model=self.config.model,
+                severity_assessment=parsed.get("severity", "unknown"),
+                confidence=float(parsed.get("confidence", 0.0)),
+                risk_factors=parsed.get("risk_factors", []),
+                grooming_indicators=parsed.get("grooming_indicators", []),
+                explanation=parsed.get("explanation", ""),
+                recommended_actions=parsed.get("recommended_actions", []),
+                raw_response=llm_response
+            )
+
+        except Exception as e:
+            print(f"Gemini analysis error: {e}")
+            return None
+
+
+class ClaudeAnalyzer(LLMAnalyzer):
+    """Anthropic Claude API analyzer"""
+
+    def analyze_conversation(self, messages: List[Dict[str, Any]]) -> Optional[LLMAnalysis]:
+        """Analyze using Claude API"""
+        if not self.config.api_key:
+            return None
+
+        try:
+            prompt = self._build_prompt(messages)
+
+            url = "https://api.anthropic.com/v1/messages"
+            headers = {
+                "Content-Type": "application/json",
+                "x-api-key": self.config.api_key,
+                "anthropic-version": "2023-06-01"
+            }
+
+            response = requests.post(
+                url,
+                headers=headers,
+                json={
+                    "model": self.config.model or "claude-3-sonnet-20240229",
+                    "max_tokens": self.config.max_tokens,
+                    "temperature": self.config.temperature,
+                    "messages": [{"role": "user", "content": prompt}]
+                },
+                timeout=30
+            )
+
+            if response.status_code != 200:
+                return None
+
+            result = response.json()
+            llm_response = result["content"][0]["text"]
+
+            parsed = self._parse_llm_response(llm_response)
+            if not parsed:
+                return None
+
+            return LLMAnalysis(
+                provider="claude",
+                model=self.config.model,
+                severity_assessment=parsed.get("severity", "unknown"),
+                confidence=float(parsed.get("confidence", 0.0)),
+                risk_factors=parsed.get("risk_factors", []),
+                grooming_indicators=parsed.get("grooming_indicators", []),
+                explanation=parsed.get("explanation", ""),
+                recommended_actions=parsed.get("recommended_actions", []),
+                raw_response=llm_response
+            )
+
+        except Exception as e:
+            print(f"Claude analysis error: {e}")
+            return None
+
+
+class ChatGPTAnalyzer(LLMAnalyzer):
+    """OpenAI ChatGPT API analyzer"""
+
+    def analyze_conversation(self, messages: List[Dict[str, Any]]) -> Optional[LLMAnalysis]:
+        """Analyze using ChatGPT API"""
+        if not self.config.api_key:
+            return None
+
+        try:
+            prompt = self._build_prompt(messages)
+
+            url = "https://api.openai.com/v1/chat/completions"
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {self.config.api_key}"
+            }
+
+            response = requests.post(
+                url,
+                headers=headers,
+                json={
+                    "model": self.config.model or "gpt-4-turbo-preview",
+                    "messages": [{"role": "user", "content": prompt}],
+                    "temperature": self.config.temperature,
+                    "max_tokens": self.config.max_tokens
+                },
+                timeout=30
+            )
+
+            if response.status_code != 200:
+                return None
+
+            result = response.json()
+            llm_response = result["choices"][0]["message"]["content"]
+
+            parsed = self._parse_llm_response(llm_response)
+            if not parsed:
+                return None
+
+            return LLMAnalysis(
+                provider="chatgpt",
+                model=self.config.model,
+                severity_assessment=parsed.get("severity", "unknown"),
+                confidence=float(parsed.get("confidence", 0.0)),
+                risk_factors=parsed.get("risk_factors", []),
+                grooming_indicators=parsed.get("grooming_indicators", []),
+                explanation=parsed.get("explanation", ""),
+                recommended_actions=parsed.get("recommended_actions", []),
+                raw_response=llm_response
+            )
+
+        except Exception as e:
+            print(f"ChatGPT analysis error: {e}")
+            return None
+
+
+class LLMAnalysisEngine:
+    """Main engine for LLM-enhanced analysis"""
+
+    def __init__(self, config: Optional[LLMConfig] = None):
+        self.config = config or LLMConfig()  # Default to Ollama
+        self.analyzer = self._create_analyzer()
+
+    def _create_analyzer(self) -> LLMAnalyzer:
+        """Create appropriate analyzer based on config"""
+        if self.config.provider == LLMProvider.OLLAMA:
+            return OllamaAnalyzer(self.config)
+        elif self.config.provider == LLMProvider.GEMINI:
+            return GeminiAnalyzer(self.config)
+        elif self.config.provider == LLMProvider.CLAUDE:
+            return ClaudeAnalyzer(self.config)
+        elif self.config.provider == LLMProvider.CHATGPT:
+            return ChatGPTAnalyzer(self.config)
+        else:
+            return OllamaAnalyzer(self.config)  # Fallback to Ollama
+
+    def analyze(self, messages: List[Dict[str, Any]], behavioral_score: float = None) -> Optional[LLMAnalysis]:
+        """Run LLM analysis on conversation
+
+        Args:
+            messages: List of conversation messages
+            behavioral_score: Optional behavioral risk score (0-100) to provide context
+        """
+        try:
+            return self.analyzer.analyze_conversation(messages, behavioral_score)
+        except Exception as e:
+            print(f"LLM analysis failed: {e}")
+            return None
+
+    def is_available(self) -> bool:
+        """Check if LLM service is available"""
+        if self.config.provider == LLMProvider.OLLAMA:
+            try:
+                response = requests.get(f"{self.config.endpoint}/api/tags", timeout=2)
+                return response.status_code == 200
+            except:
+                return False
+        else:
+            # For API-based providers, check if API key is set
+            return self.config.api_key is not None
+
+    @staticmethod
+    def get_recommended_models() -> Dict[str, List[str]]:
+        """Get recommended models for each provider"""
+        return {
+            "ollama": [
+                "llama-guard-3",  # Meta's safety/moderation model
+                "llama3.2",       # General purpose, good reasoning
+                "mistral",        # Fast, good at instructions
+                "gemma2",         # Google's safety-focused model
+            ],
+            "gemini": [
+                "gemini-1.5-pro",
+                "gemini-1.5-flash",
+            ],
+            "claude": [
+                "claude-3-opus-20240229",
+                "claude-3-sonnet-20240229",
+                "claude-3-haiku-20240307",
+            ],
+            "chatgpt": [
+                "gpt-4-turbo-preview",
+                "gpt-4",
+                "gpt-3.5-turbo",
+            ]
+        }

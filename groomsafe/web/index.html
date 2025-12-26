@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GROOMSAFE - Behavioral Risk Assessment Platform</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                    <circle cx="20" cy="20" r="18" stroke="#e06228" stroke-width="3"/>
+                    <path d="M20 12V20L26 26" stroke="#e06228" stroke-width="3" stroke-linecap="round"/>
+                </svg>
+                <div class="logo-text">
+                    <h1>GROOMSAFE</h1>
+                    <p>Behavioral Risk Assessment Platform</p>
+                </div>
+            </div>
+            <div class="header-status">
+                <select id="languageSelector" class="language-selector" onchange="setLanguage(this.value)">
+                    <option value="en">🇺🇸 English</option>
+                    <option value="pt">🇧🇷 Português</option>
+                    <option value="es">🇪🇸 Español</option>
+                </select>
+                <span class="status-indicator" id="apiStatus">
+                    <span class="dot"></span>
+                    API Status
+                </span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Left Panel - Input -->
+            <section class="panel input-panel">
+                <h2>Conversation Analysis</h2>
+
+                <!-- Quick Load Section -->
+                <div class="section">
+                    <h3>Quick Load Example</h3>
+                    <div class="example-buttons">
+                        <button class="btn btn-example" data-example="low">
+                            <span class="badge badge-success">Low Risk</span>
+                            Educational Conversation
+                        </button>
+                        <button class="btn btn-example" data-example="moderate">
+                            <span class="badge badge-warning">Moderate Risk</span>
+                            Concerning Patterns
+                        </button>
+                        <button class="btn btn-example" data-example="high">
+                            <span class="badge badge-danger">High Risk</span>
+                            Multiple Indicators
+                        </button>
+                        <button class="btn btn-example" data-example="critical">
+                            <span class="badge badge-critical">Critical Risk</span>
+                            Escalation Detected
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Manual Input Section -->
+                <div class="section">
+                    <h3>Manual Input</h3>
+                    <div class="form-group">
+                        <label for="platformType">Platform Type</label>
+                        <select id="platformType">
+                            <option value="social_media">Social Media</option>
+                            <option value="messaging_app">Messaging App</option>
+                            <option value="gaming_platform">Gaming Platform</option>
+                            <option value="educational_forum">Educational Forum</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="messageInput">Add Messages (JSON format or use message builder below)</label>
+                        <textarea
+                            id="messageInput"
+                            rows="8"
+                            placeholder='[{"timestamp": "2024-01-01T10:00:00Z", "sender_role": "adult", "abstracted_text": "Message text..."}]'
+                        ></textarea>
+                    </div>
+
+                    <!-- Message Builder -->
+                    <div class="message-builder">
+                        <h4>Message Builder</h4>
+                        <div class="builder-controls">
+                            <select id="builderRole">
+                                <option value="adult">Adult</option>
+                                <option value="minor">Minor</option>
+                            </select>
+                            <input type="text" id="builderText" placeholder="Message text...">
+                            <button class="btn btn-sm" id="addMessageBtn">Add Message</button>
+                        </div>
+                        <div id="messagesList" class="messages-list"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="exposureLevel">Analyst Exposure Level</label>
+                        <select id="exposureLevel">
+                            <option value="minimal">Minimal (Default)</option>
+                            <option value="moderate">Moderate</option>
+                            <option value="detailed">Detailed</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="analystId">Analyst ID (Optional)</label>
+                        <input type="text" id="analystId" placeholder="analyst_001">
+                    </div>
+
+                    <!-- LLM Configuration -->
+                    <div class="section llm-section">
+                        <div class="llm-header">
+                            <h3>🤖 LLM-Enhanced Analysis (Optional)</h3>
+                            <span class="toggle-icon" id="llmToggleIcon">▼</span>
+                        </div>
+                        <div class="llm-config" id="llmConfig" style="display: none;">
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="llmEnabled">
+                                    Enable LLM Analysis
+                                </label>
+                                <small>Uses AI to enrich behavioral detection</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="llmProvider">Provider</label>
+                                <select id="llmProvider">
+                                    <option value="ollama">Ollama (Local, Free)</option>
+                                    <option value="gemini">Google Gemini</option>
+                                    <option value="claude">Anthropic Claude</option>
+                                    <option value="chatgpt">OpenAI ChatGPT</option>
+                                </select>
+                                <small id="providerNote" class="provider-note">
+                                    Requires Ollama installed: <a href="https://ollama.ai" target="_blank">ollama.ai</a>
+                                </small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="llmModel">Model</label>
+                                <select id="llmModel">
+                                    <option value="llama-guard-3">llama-guard-3 (Recommended)</option>
+                                    <option value="llama3.2">llama3.2</option>
+                                    <option value="mistral">mistral</option>
+                                    <option value="gemma2">gemma2</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group" id="apiKeyGroup" style="display: none;">
+                                <label for="llmApiKey">API Key</label>
+                                <input type="password" id="llmApiKey" placeholder="sk-...">
+                                <small>Required for cloud providers</small>
+                            </div>
+
+                            <button class="btn btn-sm btn-secondary" id="testLLMBtn">
+                                Test Connection
+                            </button>
+                            <span id="llmStatus" class="llm-status"></span>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary btn-block" id="analyzeBtn">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10 2C5.58 2 2 5.58 2 10s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/>
+                            <path d="M10.5 6h-1v5l4.25 2.52.75-1.23-3.5-2.08z"/>
+                        </svg>
+                        Analyze Conversation
+                    </button>
+                </div>
+            </section>
+
+            <!-- Right Panel - Results -->
+            <section class="panel results-panel">
+                <h2>Analysis Results</h2>
+
+                <div id="loadingState" class="loading-state" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>Analyzing conversation patterns...</p>
+                </div>
+
+                <div id="emptyState" class="empty-state">
+                    <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
+                        <circle cx="50" cy="50" r="40" stroke="#ddd" stroke-width="4"/>
+                        <path d="M50 30v20m0 10h.01" stroke="#ddd" stroke-width="4" stroke-linecap="round"/>
+                    </svg>
+                    <p>No analysis yet. Load an example or submit a conversation to begin.</p>
+                </div>
+
+                <div id="resultsContent" class="results-content" style="display: none;">
+                    <!-- Risk Score Card -->
+                    <div class="card risk-card">
+                        <h3>Risk Assessment</h3>
+                        <div class="risk-score-display">
+                            <div class="score-circle" id="scoreCircle">
+                                <svg width="200" height="200">
+                                    <circle cx="100" cy="100" r="90" stroke="#eee" stroke-width="20" fill="none"/>
+                                    <circle id="scoreProgressCircle" cx="100" cy="100" r="90"
+                                            stroke="#e06228" stroke-width="20" fill="none"
+                                            stroke-dasharray="565.48" stroke-dashoffset="565.48"
+                                            transform="rotate(-90 100 100)"/>
+                                </svg>
+                                <div class="score-value">
+                                    <span id="scoreValue">0</span>
+                                    <span class="score-max">/100</span>
+                                </div>
+                            </div>
+                            <div class="risk-details">
+                                <div class="risk-level-badge" id="riskLevelBadge">
+                                    <span id="riskLevel">-</span>
+                                </div>
+                                <div class="risk-metrics">
+                                    <div class="metric">
+                                        <label>Confidence</label>
+                                        <span id="confidence">-</span>
+                                    </div>
+                                    <div class="metric">
+                                        <label>Stage</label>
+                                        <span id="stage">-</span>
+                                    </div>
+                                    <div class="metric">
+                                        <label>Human Review</label>
+                                        <span id="humanReview">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Export Actions -->
+                    <div class="export-actions">
+                        <button class="btn btn-secondary" onclick="exportReportJSON()">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M8 12l-4-4h2.5V4h3v4H12l-4 4zm-6 2h12v2H2v-2z"/>
+                            </svg>
+                            Export JSON
+                        </button>
+                        <button class="btn btn-secondary" onclick="exportReportPDF()">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M4 0h8a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V2a2 2 0 012-2zm0 1a1 1 0 00-1 1v12a1 1 0 001 1h8a1 1 0 001-1V2a1 1 0 00-1-1H4z"/>
+                                <path d="M5 4h6v1H5V4zm0 2h6v1H5V6zm0 2h4v1H5V8z"/>
+                            </svg>
+                            Export PDF
+                        </button>
+                    </div>
+
+                    <!-- Behavioral Features -->
+                    <div class="card">
+                        <h3>Behavioral Features</h3>
+                        <div id="featuresChart" class="features-chart"></div>
+                    </div>
+
+                    <!-- LLM Analysis (if enabled) -->
+                    <div class="card llm-analysis-card" id="llmAnalysisCard" style="display: none;">
+                        <h3>🤖 AI-Enhanced Analysis</h3>
+                        <div class="llm-result">
+                            <div class="llm-meta">
+                                <span class="llm-badge" id="llmProviderBadge">-</span>
+                                <span class="llm-model" id="llmModelName">-</span>
+                                <span class="llm-confidence">Confidence: <strong id="llmConfidence">-</strong></span>
+                            </div>
+                            <div class="llm-severity">
+                                <label>AI Severity Assessment</label>
+                                <div class="severity-badge" id="llmSeverityBadge">-</div>
+                            </div>
+                            <div class="llm-explanation">
+                                <label>Analysis Explanation</label>
+                                <p id="llmExplanation">-</p>
+                            </div>
+                            <div class="llm-indicators">
+                                <label>Grooming Indicators Detected</label>
+                                <ul id="llmGroomingIndicators"></ul>
+                            </div>
+                            <div class="llm-factors">
+                                <label>Risk Factors</label>
+                                <ul id="llmRiskFactors"></ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- HUMANSHIELD Summary -->
+                    <div class="card humanshield-card">
+                        <h3>🛡️ HUMANSHIELD Protection Summary</h3>
+                        <div class="shield-content">
+                            <div class="shield-item">
+                                <label>Behavioral Cluster</label>
+                                <p id="behavioralCluster">-</p>
+                            </div>
+                            <div class="shield-item">
+                                <label>Temporal Pattern</label>
+                                <p id="temporalPattern">-</p>
+                            </div>
+                            <div class="shield-item">
+                                <label>Key Risk Indicators</label>
+                                <ul id="riskIndicators"></ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recommendations -->
+                    <div class="card recommendations-card">
+                        <h3>Recommended Actions</h3>
+                        <ul id="recommendations" class="recommendations-list"></ul>
+                    </div>
+
+                    <!-- Feature Contributions -->
+                    <div class="card">
+                        <h3>Top Contributing Features</h3>
+                        <div id="contributions" class="contributions-list"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2024 GROOMSAFE - Behavioral Grooming Prevention & Investigator Protection Platform</p>
+            <p class="footer-links">
+                <a href="http://localhost:8090/docs" target="_blank">API Docs</a> |
+                <a href="../README.md" target="_blank">Documentation</a> |
+                <a href="https://github.com" target="_blank">GitHub</a>
+            </p>
+        </footer>
+    </div>
+
+    <script src="/static/i18n.js"></script>
+    <script src="/static/app.js"></script>
+    <script>
+        // Initialize language on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initI18n();
+        });
+    </script>
+</body>
+</html>

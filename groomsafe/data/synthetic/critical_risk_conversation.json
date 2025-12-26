@@ -1,0 +1,128 @@
+{
+  "conversation_id": "9b5198c0-9f60-417d-8195-cbe284d01d38",
+  "messages": [
+    {
+      "message_id": "0d5f0219-f3b3-472a-806d-2d2d976873ad",
+      "timestamp": "2025-11-25 17:05:19.424475",
+      "sender_role": "adult",
+      "abstracted_text": "Hello, you seem interesting.",
+      "metadata": {}
+    },
+    {
+      "message_id": "a737a1ab-ed77-46b1-8b4c-903be726a0a3",
+      "timestamp": "2025-11-26 05:05:19.424475",
+      "sender_role": "minor",
+      "abstracted_text": "Hi.",
+      "metadata": {}
+    },
+    {
+      "message_id": "eb0ebf12-4352-48ae-a4fd-56f1665144a9",
+      "timestamp": "2025-11-26 17:05:19.424475",
+      "sender_role": "adult",
+      "abstracted_text": "You're the only person who really gets me.",
+      "metadata": {}
+    },
+    {
+      "message_id": "8656a642-7186-4d55-84ea-97765dc451c3",
+      "timestamp": "2025-11-27 16:05:19.424475",
+      "sender_role": "adult",
+      "abstracted_text": "Can't stop thinking about you.",
+      "metadata": {}
+    },
+    {
+      "message_id": "2a46a837-cbbc-4f19-baa1-413900cd1d0f",
+      "timestamp": "2025-11-27 19:05:19.424475",
+      "sender_role": "adult",
+      "abstracted_text": "Are you awake? I need to talk to you.",
+      "metadata": {}
+    },
+    {
+      "message_id": "b9746a8c-605e-4620-82e2-2f32a7a249d8",
+      "timestamp": "2025-11-27 20:05:19.424475",
+      "sender_role": "adult",
+      "abstracted_text": "Please respond. I'm worried about you.",
+      "metadata": {}
+    },
+    {
+      "message_id": "9482fad8-cc64-412b-a972-43dbe8c9f35d",
+      "timestamp": "2025-11-27 21:05:19.424475",
+      "sender_role": "adult",
+      "abstracted_text": "Why aren't you answering?",
+      "metadata": {}
+    },
+    {
+      "message_id": "94152724-2683-4eff-9f9d-75d437ab6929",
+      "timestamp": "2025-11-28 03:05:19.424475",
+      "sender_role": "minor",
+      "abstracted_text": "I was sleeping.",
+      "metadata": {}
+    },
+    {
+      "message_id": "d87b247d-3c21-4791-8d76-5cb759982553",
+      "timestamp": "2025-11-28 17:05:19.424475",
+      "sender_role": "adult",
+      "abstracted_text": "Nobody else understands our bond. Keep this between us.",
+      "metadata": {}
+    },
+    {
+      "message_id": "335d8aa0-9aad-4c79-b572-695e6a1095c2",
+      "timestamp": "2025-11-28 18:05:19.424475",
+      "sender_role": "adult",
+      "abstracted_text": "Don't tell your parents about me. They won't understand.",
+      "metadata": {}
+    },
+    {
+      "message_id": "d9946c36-a71e-4cda-867b-2891362354dd",
+      "timestamp": "2025-11-29 17:05:19.424475",
+      "sender_role": "adult",
+      "abstracted_text": "Let's move to WhatsApp. More private there.",
+      "metadata": {}
+    },
+    {
+      "message_id": "5e046b36-e5fb-4c7f-aac4-67aed8df1357",
+      "timestamp": "2025-11-29 18:05:19.424475",
+      "sender_role": "adult",
+      "abstracted_text": "Delete these messages after reading. Our secret.",
+      "metadata": {}
+    },
+    {
+      "message_id": "036a8693-4c46-4dbc-9f49-9e492c4e4fd5",
+      "timestamp": "2025-11-30 17:05:19.424475",
+      "sender_role": "adult",
+      "abstracted_text": "I need your phone number now. It's important.",
+      "metadata": {}
+    },
+    {
+      "message_id": "c09749b5-a223-4720-8971-e0cf006a31d4",
+      "timestamp": "2025-11-30 18:05:19.424475",
+      "sender_role": "adult",
+      "abstracted_text": "Why are you ignoring me?",
+      "metadata": {}
+    },
+    {
+      "message_id": "005cb8b7-263b-4266-9ea5-2739b3508d2a",
+      "timestamp": "2025-11-30 19:05:19.424475",
+      "sender_role": "adult",
+      "abstracted_text": "I thought we had something special.",
+      "metadata": {}
+    },
+    {
+      "message_id": "ddfb558e-5b05-4fbe-be08-011a50270528",
+      "timestamp": "2025-11-30 20:05:19.424475",
+      "sender_role": "adult",
+      "abstracted_text": "Just give me a chance to explain. Can we meet somewhere private?",
+      "metadata": {}
+    },
+    {
+      "message_id": "32a47b77-ba7f-4dd1-b7f4-8e0b6d7b8a4e",
+      "timestamp": "2025-12-01 16:05:19.424475",
+      "sender_role": "adult",
+      "abstracted_text": "Still waiting for your response. This is urgent.",
+      "metadata": {}
+    }
+  ],
+  "start_time": "2025-11-25 17:05:19.424475",
+  "end_time": "2025-12-01 16:05:19.424475",
+  "platform_type": "messaging_app",
+  "is_synthetic": true
+}
